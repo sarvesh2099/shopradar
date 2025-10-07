@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - ShopRadar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+    <!-- Google Maps API Script --><!-- IMPORTANT: Replace YOUR_GOOGLE_MAPS_API_KEY with your actual key on line 14 --><script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcri_usdVkojUei9vqPvOtOUvhOj83gRE&libraries=places&callback=initMap"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .pac-container { z-index: 1050 !important; } /* Ensures map search suggestions appear on top */
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <!-- Header --><header class="bg-gradient-to-r from-blue-800 to-blue-600 text-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo and Title --><div class="flex items-center space-x-3">
+                    <div class="bg-white p-1.5 rounded-md">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h2.64m-13.5 0L12 14.251 17.64 21M9.75 21a2.25 2.25 0 01-2.25-2.25V7.5a2.25 2.25 0 012.25-2.25h4.5a2.25 2.25 0 012.25 2.25v11.25a2.25 2.25 0 01-2.25 2.25h-4.5z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">ShopRadar</h1>
+                        <p class="text-sm opacity-90">Your Business Compass</p>
+                    </div>
+                </div>
+                <!-- Navigation --><nav class="hidden md:flex items-center space-x-6">
+                    <a href="#" class="text-sm font-medium hover:text-teal-300 transition-colors">Home</a>
+                    <a href="#" class="text-sm font-medium hover:text-teal-300 transition-colors">My Account</a>
+                    <a href="#" class="text-sm font-medium bg-teal-500 px-4 py-2 rounded-md hover:bg-teal-600 transition-colors">Logout</a>
+                </nav>
+                 <!-- Mobile Menu Button --><div class="md:hidden">
+                    <button class="text-white focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content --><main class="container mx-auto p-4 sm:p-6 lg:p-8">
+
+        <!-- Search and Filter Section --><section class="bg-white rounded-xl shadow-md p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-1">Find Products Near You</h2>
+            <!-- Location Text - Will be updated by map selection --><p id="location-text" class="text-gray-500 mb-4">Check availability in shops around Thane, Maharashtra.</p>
+            <div class="flex flex-col md:flex-row gap-4">
+                <!-- Search Group: Input + Location Button --><div class="flex-grow flex items-center">
+                    <div class="relative flex-grow">
+                        <input type="text" id="search-input" placeholder="Search for a product (e.g., 'Milk', 'Paracetamol')" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-l-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 focus:z-10">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+                    </div>
+                    <button id="toggle-map-btn" class="relative -ml-px inline-flex items-center px-4 py-3 border border-gray-300 text-sm font-medium rounded-r-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" /></svg>
+                        Location
+                    </button>
+                </div>
+
+                <!-- Category Filter Dropdown --><div class="relative">
+                     <select id="category-filter" class="w-full md:w-48 appearance-none bg-white border border-gray-300 rounded-lg shadow-sm pl-4 pr-10 py-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <option value="all">All Categories</option>
+                        <option value="Groceries">Groceries</option>
+                        <option value="Pharmacy">Pharmacy</option>
+                        <option value="Electronics">Electronics</option>
+                    
+                    </select>
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                       <svg class="w-5 h-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- NEW: Map Selection Section (Hidden by default) --><section id="map-section" class="hidden bg-white rounded-xl shadow-md p-6 mb-8">
+             <h3 class="text-xl font-bold text-gray-800 mb-4">Select Your Location</h3>
+             <input type="text" id="map-address-input" placeholder="Search for an address or drag the pin" class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+             <div id="map" class="mt-4 h-80 w-full rounded-md border"></div>
+        </section>
+
+
+        <!-- Nearby Shops Section --><section class="mb-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Shops Near You</h2>
+            <div id="shops-container" class="flex gap-6 overflow-x-auto pb-4 no-scrollbar">
+                <!-- Shop cards will be inserted here by JavaScript --></div>
+        </section>
+
+        <!-- Product Availability Section --><section>
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Product Availability</h2>
+            <div id="products-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Product cards will be inserted here by JavaScript --></div>
+             <div id="no-results" class="hidden text-center py-16">
+                <h3 class="text-xl font-semibold text-gray-700">No Products Found</h3>
+                <p class="text-gray-500 mt-2">Try adjusting your search or filter to find what you're looking for.</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // --- GOOGLE MAP INITIALIZATION ---
+        let map, marker, geocoder;
+        function initMap() {
+            const defaultLocation = { lat: 19.2183, lng: 72.9781 }; // Thane, Maharashtra
+            map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 13,
+                center: defaultLocation,
+                disableDefaultUI: true,
+            });
+            marker = new google.maps.Marker({
+                position: defaultLocation,
+                map: map,
+                draggable: true
+            });
+            geocoder = new google.maps.Geocoder();
+            const mapAddressInput = document.getElementById("map-address-input");
+            const autocomplete = new google.maps.places.Autocomplete(mapAddressInput);
+            
+            autocomplete.addListener("place_changed", () => {
+                const place = autocomplete.getPlace();
+                if (place.geometry && place.geometry.location) {
+                    map.setCenter(place.geometry.location);
+                    marker.setPosition(place.geometry.location);
+                    updateLocationText(place.formatted_address);
+                }
+            });
+
+            marker.addListener('dragend', () => {
+                geocoder.geocode({ 'location': marker.getPosition() }, (results, status) => {
+                    if (status === 'OK' && results[0]) {
+                        mapAddressInput.value = results[0].formatted_address;
+                        updateLocationText(results[0].formatted_address);
+                    }
+                });
+            });
+        }
+        
+        function updateLocationText(address) {
+             const locationText = document.getElementById('location-text');
+             const addressParts = address.split(',');
+             const displayAddress = addressParts.length > 2 ? `${addressParts[0]}, ${addressParts[1]}` : address;
+             locationText.textContent = `Check availability in shops around ${displayAddress}.`;
+        }
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- MOCK DATA with AI-Generated Image URLs (from Unsplash, Pexels, etc.) ---
+            const shops = [
+                { id: 1, name: 'Reliable Groceries', address: 'Gokhale Road, Thane West', distance: '1.2 km', status: 'Open', imageUrl: 'https://images.unsplash.com/photo-1540340061722-9293d5163008?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' }, // AI image of a modern grocery store
+                { id: 2, name: 'Wellness Pharmacy', address: 'Ram Maruti Road, Thane West', distance: '2.5 km', status: 'Open', imageUrl: 'https://images.unsplash.com/photo-1698466632366-09fa1d925de6?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' }, // AI image of a clean pharmacy interior
+                { id: 3, name: 'Gadget Hub Electronics', address: 'Viviana Mall, Thane West', distance: '4.0 km', status: 'Closing Soon', imageUrl: 'https://images.pexels.com/photos/25809243/pexels-photo-25809243.jpeg' }, // AI image of an electronics store display
+                { id: 5, name: 'Daily Needs Mart', address: 'Hiranandani Estate, Thane', distance: '6.1 km', status: 'Closed', imageUrl: 'https://images.unsplash.com/photo-1606824722920-4c652a70f348?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' } // AI image of a small convenience store
+            ];
+            const products = [
+                { id: 101, name: 'Amul Gold Milk', category: 'Groceries', imageUrl: 'https://images.unsplash.com/photo-1757857843388-b8e0127e1cef?q=80&w=651&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', availability: [{ shopId: 1, price: '₹30', stock: 'In Stock' }, { shopId: 5, price: '₹31', stock: 'In Stock' }]}, // AI image of a milk carton
+                { id: 102, name: 'Paracetamol 500mg', category: 'Pharmacy', imageUrl: 'https://images.unsplash.com/photo-1631980839248-1a84a60c66ac?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', availability: [{ shopId: 2, price: '₹25', stock: 'In Stock' }]}, // AI image of paracetamol pills
+                { id: 103, name: 'USB-C Cable', category: 'Electronics', imageUrl: 'https://images.unsplash.com/photo-1649959223405-f927e0fc1e05?q=80&w=1045&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxM', availability: [{ shopId: 3, price: '₹450', stock: 'Low Stock' }]}, // AI image of a USB-C cable
+                { id: 104, name: 'Lays Potato Chips', category: 'Groceries', imageUrl: 'https://images.unsplash.com/photo-1741520150134-0d60d82dfac9?q=80&w=1406&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', availability: [{ shopId: 1, price: '₹20', stock: 'In Stock' }, { shopId: 5, price: '₹20', stock: 'In Stock' }]}, // AI image of a bag of chips
+                { id: 107, name: 'Samsung Galaxy S23', category: 'Electronics', imageUrl: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', availability: [{ shopId: 3, price: '₹999', stock: 'In Stock' }]} // AI image of a phone case
+            ];
+            const shopsContainer = document.getElementById('shops-container');
+            const productsContainer = document.getElementById('products-container');
+            const searchInput = document.getElementById('search-input');
+            const categoryFilter = document.getElementById('category-filter');
+            const noResults = document.getElementById('no-results');
+            const toggleMapBtn = document.getElementById('toggle-map-btn');
+            const mapSection = document.getElementById('map-section');
+
+            // --- MAP TOGGLING ---
+            toggleMapBtn.addEventListener('click', () => {
+                mapSection.classList.toggle('hidden');
+            });
+
+            // --- RENDER FUNCTIONS ---
+            function renderShops() {
+                shopsContainer.innerHTML = '';
+                shops.forEach(shop => {
+                    const statusColor = shop.status === 'Open' ? 'text-green-600' : (shop.status === 'Closing Soon' ? 'text-yellow-600' : 'text-red-600');
+                    const shopCard = `
+                        <div class="flex-shrink-0 w-72 bg-white rounded-xl shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300">
+                            <img class="h-32 w-full object-cover" src="${shop.imageUrl}" alt="${shop.name}">
+                            <div class="p-4">
+                                <h3 class="font-bold text-gray-800">${shop.name}</h3>
+                                <p class="text-sm text-gray-500">${shop.address}</p>
+                                <div class="flex justify-between items-center mt-3">
+                                    <span class="text-sm text-gray-600">${shop.distance}</span>
+                                    <span class="text-sm font-semibold ${statusColor}">${shop.status}</span>
+                                </div>
+                            </div>
+                        </div>`;
+                    shopsContainer.innerHTML += shopCard;
+                });
+            }
+            function renderProducts(filteredProducts) {
+                productsContainer.innerHTML = '';
+                noResults.classList.toggle('hidden', filteredProducts.length > 0);
+                filteredProducts.forEach(product => {
+                    let availabilityHtml = '';
+                    product.availability.forEach(item => {
+                        const shop = shops.find(s => s.id === item.shopId);
+                        if(shop) {
+                            const stockColor = item.stock === 'In Stock' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
+                            availabilityHtml += `
+                                <div class="flex justify-between items-center py-2 border-b last:border-b-0">
+                                    <div>
+                                        <p class="font-semibold text-gray-700">${shop.name}</p>
+                                        <p class="text-xs text-gray-500">${shop.address}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="font-bold text-gray-800">${item.price}</p>
+                                        <span class="text-xs font-medium px-2 py-1 rounded-full ${stockColor}">${item.stock}</span>
+                                    </div>
+                                </div>`;
+                        }
+                    });
+                    const productCard = `
+                        <div class="bg-white rounded-xl shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300">
+                             <img class="h-48 w-full object-cover" src="${product.imageUrl}" alt="${product.name}">
+                            <div class="p-6">
+                                <div class="uppercase tracking-wide text-sm text-blue-600 font-semibold">${product.category}</div>
+                                <h3 class="mt-1 text-lg leading-tight font-bold text-gray-900">${product.name}</h3>
+                                <div class="mt-4 space-y-2">${availabilityHtml}</div>
+                            </div>
+                        </div>`;
+                    productsContainer.innerHTML += productCard;
+                });
+            }
+            function filterAndRender() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const selectedCategory = categoryFilter.value;
+                let filteredProducts = products.filter(product => {
+                    const nameMatch = product.name.toLowerCase().includes(searchTerm);
+                    const categoryMatch = selectedCategory === 'all' || product.category === selectedCategory;
+                    return nameMatch && categoryMatch;
+                });
+                renderProducts(filteredProducts);
+            }
+
+            // --- EVENT LISTENERS ---
+            searchInput.addEventListener('input', filterAndRender);
+            categoryFilter.addEventListener('change', filterAndRender);
+            
+            // --- INITIAL RENDER ---
+            renderShops();
+            renderProducts(products);
+        });
+    </script>
+</body>
+</html>
+
